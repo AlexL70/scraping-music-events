@@ -1,6 +1,7 @@
 import os
 import selectorlib as sl
 from scrape import scrape
+from send_email import send_email
 
 URL = "https://programmer100.pythonanywhere.com/tours/"
 
@@ -26,17 +27,13 @@ def check(extracted: str):
         return False
 
 
-def send_email():
-    print("Email sent")
-
-
 print(f"Scraping the page: {URL}")
 success, scraped = scrape(URL)
 if success:
     extracted = extract(scraped)
     if extracted and extracted != "No upcoming tours" and not check(extracted):
         store(extracted)
-        send_email()
+        send_email(extracted)
     print(extracted)
 else:
     print(f"Failed to scrape the page:\n\n {scraped[:100]}")
