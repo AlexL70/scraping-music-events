@@ -22,10 +22,13 @@ def get_cursor() -> sqlite3.Cursor:
 
 
 def store(extracted: str):
-    band, city, date = extracted.split(", ")
+    splitted = extracted.split(",")
+    splitted = [item.strip() for item in splitted]
+    band, city, date = splitted
     cursor = get_cursor()
     cursor.execute(
-        f"INSERT INTO events (band, city, date) VALUES ('{band}', '{city}', '{date}')"
+        f"INSERT INTO events (band, city, date) VALUES (?, ?, ?)",
+        (band, city, date)
     )
     cursor.connection.commit()
     cursor.close()
@@ -35,7 +38,8 @@ def check(extracted: str) -> bool:
     band, city, date = extracted.split(", ")
     cursor = get_cursor()
     cursor.execute(
-        f"SELECT * FROM events WHERE band = '{band}' AND city = '{city}' AND date = '{date}'"
+        f"SELECT * FROM events WHERE band = ? AND city = ? AND date = ?",
+        (band, city, date)
     )
     if cursor.fetchone():
         result = True
