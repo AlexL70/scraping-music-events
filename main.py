@@ -1,16 +1,9 @@
 import sqlite3
-import selectorlib as sl
-from scrape import scrape
-from send_email import send_email
+from event import Event
+from email_class import Email
 import time
 
 URL = "https://programmer100.pythonanywhere.com/tours/"
-
-
-def extract(source: str) -> dict:
-    extractor = sl.Extractor.from_yaml_file("extract.yml")
-    value = extractor.extract(source)["tours"]
-    return value
 
 
 def get_cursor() -> sqlite3.Cursor:
@@ -49,15 +42,18 @@ def check(extracted: str) -> bool:
     return result
 
 
-while True:
-    print(f"Scraping the page: {URL}")
-    success, scraped = scrape(URL)
-    if success:
-        extracted = extract(scraped)
-        if extracted and extracted != "No upcoming tours" and not check(extracted):
-            store(extracted)
-            send_email(extracted)
-        print(extracted)
-    else:
-        print(f"Failed to scrape the page:\n\n {scraped[:100]}")
-    time.sleep(5)
+if __name__ == "__main__":
+    while True:
+        print(f"Scraping the page: {URL}")
+        event = Event()
+        success, scraped = event.scrape(URL)
+        if success:
+            extracted = event.extract(scraped)
+            if extracted and extracted != "No upcoming tours" and not check(extracted):
+                store(extracted)
+                email = Email()
+                email.send(extracted)
+            print(extracted)
+        else:
+            print(f"Failed to scrape the page:\n\n {scraped[:100]}")
+        time.sleep(5)
